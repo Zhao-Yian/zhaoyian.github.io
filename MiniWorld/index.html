@@ -1,0 +1,362 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="description"
+      content="MiniWorld is a lightweight, transparent, and reproducible framework for training streaming video world models from scratch, with block-causal Video DiT, chunk-wise noise scheduling, and rolling-KV streaming inference."
+    />
+    <meta name="theme-color" content="#f6f5f1" />
+    <title>MiniWorld: Democratizing the Training of Video World Models from Scratch</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <header class="site-header" data-header>
+      <a class="wordmark" href="#top" aria-label="MiniWorld home">
+        <span class="wordmark-mark" aria-hidden="true"></span>
+        MiniWorld
+      </a>
+      <nav aria-label="Primary navigation">
+        <a href="#overview">Overview</a>
+        <a href="#demos">Demos</a>
+        <a href="#method">Method</a>
+        <a href="#results">Results</a>
+        <a href="#models">Models</a>
+      </nav>
+      <a class="header-link" href="https://github.com/zhao-yian/MiniWorld">Code ↗</a>
+      <button class="menu-button" type="button" aria-label="Open menu" aria-expanded="false">
+        <span></span><span></span>
+      </button>
+    </header>
+
+    <div class="mobile-menu" aria-hidden="true">
+      <a href="#overview">Overview</a>
+      <a href="#demos">Demos</a>
+      <a href="#method">Method</a>
+      <a href="#results">Results</a>
+      <a href="#models">Models</a>
+    </div>
+
+    <main id="top">
+      <section class="hero page-width">
+        <div class="hero-copy reveal">
+          <p class="paper-label">Research project · 2026</p>
+          <h1>
+            <span>MiniWorld:</span>
+            Democratizing the Training of Video World Models from Scratch
+          </h1>
+          <p class="hero-summary">
+            A minimal and reproducible recipe for training action- and pose-conditioned
+            streaming video world models from scratch.
+          </p>
+
+          <div class="authors" aria-label="Authors">
+            <span>Yian Zhao</span>
+            <span>Ruochong Zheng</span>
+            <span>Hongcan Guo</span>
+            <span>Yu Yan</span>
+            <span>Jian Zhang</span>
+            <span>Jie Chen</span>
+          </div>
+          <p class="affiliation">Peking University</p>
+
+          <div class="link-row">
+            <a class="button primary" href="https://github.com/zhao-yian/MiniWorld">Code</a>
+            <a class="button" href="https://huggingface.co/zhao-yian/MiniWorld">Models</a>
+            <button class="button" type="button" data-copy-citation>Copy citation</button>
+            <span class="availability">Paper coming soon</span>
+          </div>
+        </div>
+
+        <div class="hero-demo reveal" data-delay="1">
+          <div class="demo-toolbar">
+            <span>Example rollout</span>
+            <div class="segmented-control" role="group" aria-label="Choose demo dataset">
+              <button class="active" type="button" data-hero-demo="droid">DROID</button>
+              <button type="button" data-hero-demo="re10k">RealEstate10K</button>
+            </div>
+          </div>
+          <div class="hero-video-frame">
+            <video
+              id="hero-video"
+              autoplay
+              muted
+              loop
+              playsinline
+              preload="metadata"
+              src="demos/droid_T64_sink1/sample_0000.mp4"
+            ></video>
+          </div>
+          <div class="demo-caption">
+            <strong id="hero-video-title">Action-conditioned robot manipulation</strong>
+            <span>Streaming generation without a fixed horizon</span>
+          </div>
+        </div>
+      </section>
+
+      <section class="overview section page-width" id="overview">
+        <div class="section-label reveal">Overview</div>
+        <div class="overview-content">
+          <h2 class="reveal">Streaming world models from scratch, with a practical recipe.</h2>
+          <div class="overview-text reveal" data-delay="1">
+            <p>
+              Video world models predict future observations conditioned on historical
+              observations and control signals. Unlike conventional video generators,
+              which mainly capture visual appearance and motion, they learn the dynamics
+              governing how an environment evolves under agent actions — a fundamental
+              building block for embodied AI and interactive simulation.
+            </p>
+            <p>
+              Recent progress has largely relied on adapting pretrained video generators
+              through post-training or distillation. These pipelines are complex, costly,
+              and inherit a mismatch between bidirectional pretraining and causal
+              streaming inference. Training from scratch is feasible and scalable, yet the
+              community still lacks a lightweight, transparent, reproducible baseline.
+            </p>
+            <p>
+              MiniWorld fills that gap. It uses a block-causal Video Diffusion Transformer
+              trained with Rectified Flow in the latent space of a pretrained video VAE,
+              and builds on Diffusion Forcing with a chunk-wise non-decreasing noise
+              schedule and two-stage continued training. At inference, a rolling KV cache
+              and pipelined asynchronous denoising keep streaming generation within a
+              bounded compute budget.
+            </p>
+            <p>
+              The entire model trains in several days on a single 8-GPU server. We release
+              the complete training and inference codebase, pretrained checkpoints, and
+              implementation details as an accessible baseline for research on long-horizon
+              generation, temporal memory, and train-test alignment.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <section class="demos section" id="demos">
+        <div class="page-width">
+          <div class="section-heading reveal">
+            <div>
+              <div class="section-label">Qualitative results</div>
+              <h2>Generated worlds</h2>
+            </div>
+            <p>
+              Long-horizon streaming rollouts under robot actions and camera trajectories.
+              Hover to play or select a video to view it at full size.
+            </p>
+          </div>
+
+          <div class="gallery-toolbar reveal">
+            <div class="filter-tabs" role="tablist" aria-label="Filter demonstrations">
+              <button class="active" type="button" role="tab" data-filter="droid">
+                DROID actions
+              </button>
+              <button type="button" role="tab" data-filter="re10k">
+                Camera poses
+              </button>
+            </div>
+            <button class="text-button" type="button" data-shuffle>Shuffle examples</button>
+          </div>
+
+          <div class="video-gallery" id="video-gallery" aria-live="polite"></div>
+
+          <div class="gallery-footer">
+            <button class="button" type="button" data-load-more>Load more examples</button>
+            <span><span id="gallery-count">8</span> of 50 shown</span>
+          </div>
+        </div>
+      </section>
+
+      <section class="method section page-width" id="method">
+        <div class="section-heading reveal">
+          <div>
+            <div class="section-label">Method</div>
+            <h2>Training and streaming inference</h2>
+          </div>
+          <p>
+            The same block-causal architecture is used throughout training and deployment,
+            reducing the mismatch between the learning objective and autoregressive
+            generation.
+          </p>
+        </div>
+
+        <figure class="paper-figure reveal">
+          <button type="button" data-expand-figure aria-label="Expand framework figure">
+            <img
+              src="assets/miniworld_overview.png"
+              alt="MiniWorld training and streaming inference framework"
+              loading="lazy"
+            />
+            <span>Click to expand</span>
+          </button>
+          <figcaption>
+            <strong>MiniWorld framework.</strong> Videos are encoded into latent chunks and
+            trained with non-decreasing noise schedules. During inference, completed chunks
+            are committed to a rolling KV cache while future chunks are denoised
+            asynchronously within a bounded active window.
+          </figcaption>
+        </figure>
+
+        <div class="method-notes reveal">
+          <p>
+            <strong>Block-causal Video DiT.</strong> Tokens interact bidirectionally within
+            each chunk and causally across chunks.
+          </p>
+          <p>
+            <strong>Chunk-oriented Probability Propagation.</strong> CoPP samples
+            non-decreasing chunk-wise noise schedules aligned with streaming inference.
+          </p>
+          <p>
+            <strong>Two-stage continued training.</strong> Short-clip training is followed
+            by long-context continuation, extending the horizon without retraining.
+          </p>
+          <p>
+            <strong>Rolling-KV streaming.</strong> Committed history is reused without
+            recomputation while the online denoising cost remains bounded.
+          </p>
+        </div>
+      </section>
+
+      <section class="results section" id="results">
+        <div class="page-width">
+          <div class="section-heading reveal">
+            <div>
+              <div class="section-label">Experiments</div>
+              <h2>Quantitative results</h2>
+            </div>
+            <p>
+              MiniWorld is evaluated on DROID and RealEstate10K against a bidirectional
+              sliding-window baseline under long-horizon streaming generation.
+            </p>
+          </div>
+
+          <div class="result-viewer reveal">
+            <div class="result-tabs" role="tablist" aria-label="Choose experiment figure">
+              <button class="active" type="button" role="tab" data-result-tab="droid">
+                DROID
+              </button>
+              <button type="button" role="tab" data-result-tab="re10k">
+                RealEstate10K
+              </button>
+              <button type="button" role="tab" data-result-tab="ablation">
+                Ablations
+              </button>
+              <button type="button" role="tab" data-result-tab="throughput">
+                Throughput
+              </button>
+            </div>
+
+            <div class="result-layout">
+              <div class="result-copy">
+                <h3 id="result-title">Results on DROID</h3>
+                <p id="result-description">
+                  MiniWorld improves appearance, dynamics, geometry, VLM-based quality, and
+                  frame-level fidelity over the bidirectional baseline.
+                </p>
+              </div>
+              <div class="result-figure">
+                <img
+                  id="result-image"
+                  src="assets/fig_main_droid.png"
+                  alt="DROID quantitative results"
+                  loading="lazy"
+                />
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="models section page-width" id="models">
+        <div class="section-heading reveal">
+          <div>
+            <div class="section-label">Model family</div>
+            <h2>Scales for different research budgets</h2>
+          </div>
+          <p>
+            All variants share the same block-causal architecture and conditioning
+            interface, differing only in depth and width.
+          </p>
+        </div>
+
+        <div class="model-cards reveal">
+          <article>
+            <h3>MiniWorld-B</h3>
+            <strong>0.12B</strong>
+            <dl><div><dt>Depth</dt><dd>12</dd></div><div><dt>Width</dt><dd>768</dd></div></dl>
+          </article>
+          <article>
+            <h3>MiniWorld-L</h3>
+            <strong>0.39B</strong>
+            <dl><div><dt>Depth</dt><dd>24</dd></div><div><dt>Width</dt><dd>1024</dd></div></dl>
+          </article>
+          <article>
+            <h3>MiniWorld-0.5B</h3>
+            <strong>0.55B</strong>
+            <dl><div><dt>Depth</dt><dd>28</dd></div><div><dt>Width</dt><dd>1152</dd></div></dl>
+          </article>
+          <article class="recommended">
+            <span>Default</span>
+            <h3>MiniWorld-1B</h3>
+            <strong>1B</strong>
+            <dl><div><dt>Depth</dt><dd>28</dd></div><div><dt>Width</dt><dd>1536</dd></div></dl>
+          </article>
+          <article>
+            <h3>MiniWorld-3B</h3>
+            <strong>3B</strong>
+            <dl><div><dt>Depth</dt><dd>32</dd></div><div><dt>Width</dt><dd>2560</dd></div></dl>
+          </article>
+        </div>
+      </section>
+
+      <section class="citation section page-width">
+        <div class="citation-copy">
+          <div>
+            <div class="section-label">Citation</div>
+            <h2>Cite MiniWorld</h2>
+          </div>
+          <button class="button" type="button" data-copy-citation>Copy BibTeX</button>
+        </div>
+        <pre><code id="bibtex">@article{zhao2026miniworld,
+  title   = {MiniWorld: Democratizing the Training of Video World Models from Scratch},
+  author  = {Zhao, Yian and Zheng, Ruochong and Guo, Hongcan and Yan, Yu and Zhang, Jian and Chen, Jie},
+  year    = {2026}
+}</code></pre>
+      </section>
+    </main>
+
+    <footer class="page-width">
+      <div>
+        <a class="wordmark" href="#top"><span class="wordmark-mark"></span>MiniWorld</a>
+        <p>Democratizing the training of video world models from scratch.</p>
+      </div>
+      <div class="footer-links">
+        <a href="https://github.com/zhao-yian/MiniWorld">Code</a>
+        <a href="https://huggingface.co/zhao-yian/MiniWorld">Models</a>
+        <a href="#top">Back to top ↑</a>
+      </div>
+    </footer>
+
+    <dialog class="media-modal" id="media-modal">
+      <button class="modal-close" type="button" aria-label="Close viewer">×</button>
+      <button class="modal-nav previous" type="button" aria-label="Previous video">←</button>
+      <video controls autoplay muted loop playsinline></video>
+      <div class="modal-meta">
+        <span></span>
+        <strong></strong>
+      </div>
+      <button class="modal-nav next" type="button" aria-label="Next video">→</button>
+    </dialog>
+
+    <dialog class="figure-modal" id="figure-modal">
+      <button class="modal-close" type="button" aria-label="Close figure">×</button>
+      <img
+        src="assets/miniworld_overview.png"
+        alt="MiniWorld framework overview"
+      />
+    </dialog>
+
+    <div class="toast" role="status" aria-live="polite">Citation copied</div>
+
+    <script src="script.js"></script>
+  </body>
+</html>
