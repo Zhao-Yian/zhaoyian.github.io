@@ -322,7 +322,7 @@ video {
 
 .hero-video-frame {
   overflow: hidden;
-  aspect-ratio: 4 / 3;
+  aspect-ratio: 41 / 31;
   border-radius: 14px;
   background: #17211d;
 }

@@ -129,11 +129,11 @@ function initHeroDemo() {
   const buttons = document.querySelectorAll("[data-hero-demo]");
   const content = {
     droid: {
-      source: videoPath("droid", 0),
+      source: "assets/demo_droid.mp4",
       title: "Action-conditioned robot manipulation",
     },
     re10k: {
-      source: videoPath("re10k", 4),
+      source: "assets/demo_re10k.mp4",
       title: "Camera-conditioned scene prediction",
     },
   };
