@@ -54,6 +54,7 @@ const results = {
 const bibtex = `@article{zhao2026miniworld,
   title   = {MiniWorld: Democratizing the Training of Video World Models from Scratch},
   author  = {Zhao, Yian and Zheng, Ruochong and Guo, Hongcan and Yan, Yu and Zhang, Jian and Chen, Jie},
+  journal = {arXiv preprint arXiv:2608.01127},
   year    = {2026}
 }`;
 
